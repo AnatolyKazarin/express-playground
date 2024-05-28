@@ -1,5 +1,5 @@
 require('dotenv').config()
-const fs = require('fs')
+const fs = require('fs/promises')
 const path = require('path')
 
 // Создать папку синхронно, блокируя поток
@@ -42,24 +42,31 @@ const path = require('path')
 // прочитать файл, посчитать кол-во слов в файле и записать
 // их в новый файл count.txt, затем удалить первый файл
 
-fs.writeFile(path.resolve(__dirname, 'string.txt'), process.env.TEXT, (err) => {
-    if(err) {
-        throw err
-    }
-    fs.readFile(path.resolve(__dirname, 'string.txt'), {encoding: 'utf-8'}, (err, data) => {
-        if (err) {
-            throw err
-        }
-        const counter = data.split(' ' || '\n').length.toString()
-        fs.writeFile(path.resolve(__dirname, 'count.txt'), counter, (err) => {
-            if(err) {
-                throw err
-            }
-            fs.rm(path.resolve(__dirname, 'string.txt'), (err) => {
-                if(err) {
-                    throw err
-                }
-            })
-        })
-    })
-})
+// Решение через цепочку callback
+// fs.writeFile(path.resolve(__dirname, 'string.txt'), process.env.TEXT, (err) => {
+//     if(err) {
+//         throw err
+//     }
+//     fs.readFile(path.resolve(__dirname, 'string.txt'), {encoding: 'utf-8'}, (err, data) => {
+//         if (err) {
+//             throw err
+//         }
+//         const counter = data.split(' ' || '\n').length.toString()
+//         fs.writeFile(path.resolve(__dirname, 'count.txt'), counter, (err) => {
+//             if(err) {
+//                 throw err
+//             }
+//             fs.rm(path.resolve(__dirname, 'string.txt'), (err) => {
+//                 if(err) {
+//                     throw err
+//                 }
+//             })
+//         })
+//     })
+// })
+
+fs.writeFile(path.resolve(__dirname, 'string.txt'), process.env.TEXT)
+    .then(_ => fs.readFile(path.resolve(__dirname, 'string.txt'), {encoding: 'utf-8'}))
+    .then(res => fs.writeFile(path.resolve(__dirname, 'count.txt'), res.split(' ').length.toString()))
+    .then(_ => fs.rm(path.resolve(__dirname, 'string.txt')))
+    .catch(err => console.log(err))
