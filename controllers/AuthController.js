@@ -40,7 +40,7 @@ class AuthController {
     async login(req, res) {
         try {
             const {username, password} = req.body
-            const candidate = await Role.findOne({username})
+            const candidate = await User.findOne({username})
             if(!candidate) {
                 return res.status(400).json({message: `Пользователь с ${username} не найден`})
             }

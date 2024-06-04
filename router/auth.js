@@ -1,6 +1,7 @@
 import Router from 'express'
 import AuthController from "../controllers/AuthController.js";
 import {check} from "express-validator";
+import authMiddleware from "../middlewares/authMiddleware.js";
 
 const auth = new Router()
 
@@ -9,6 +10,6 @@ auth.post('/registration', [
     check('password', "Пароль должен быть от 4 до 12 символов").isLength({min: 4, max: 12})
 ], AuthController.registration)
 auth.post('/login', AuthController.login)
-auth.get('/users', AuthController.getUsers)
+auth.get('/users', authMiddleware, AuthController.getUsers)
 
 export default auth
