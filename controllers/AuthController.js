@@ -5,6 +5,7 @@ import bcrypt from 'bcryptjs'
 import {validationResult} from "express-validator";
 import jwt from 'jsonwebtoken'
 import {config} from "dotenv";
+import ApiError from "../error/ApiError.js";
 config()
 
 const secret = process.env.SECRET_KEY
@@ -15,17 +16,17 @@ const generateAccessToken = (id, roles) => {
 }
 
 class AuthController {
-    async registration(req, res) {
+    async registration(req, res, next) {
         try {
             const errors = validationResult(req)
             if(!errors.isEmpty()) {
-                return res.status(400).json({message: 'Ошибка при регистрации', errors})
+                return next(ApiError.badRequest('Ошибка при регистрации'))
             }
 
             const {username, password} = req.body
             const candidate = await User.findOne({username})
             if(candidate) {
-                return res.status(400).json({message: 'Пользователь с таким именем уже существует'})
+                return next(ApiError.badRequest('Пользователь с таким именем уже существует'))
             }
             const hashedPassword = bcrypt.hashSync(password, 7)
             // const userRole = await Role.findOne({value: "USER"})
@@ -35,36 +36,36 @@ class AuthController {
             return res.json({message: "Пользователь успешно зарегистрирован"})
         } catch (e) {
             console.log(e)
-            res.status(400).json({message: "Registration error"})
+            return next(ApiError.badRequest("Registration error"))
         }
     }
 
-    async login(req, res) {
+    async login(req, res, next) {
         try {
             const {username, password} = req.body
             const candidate = await User.findOne({ where: { username } })
             if(!candidate) {
-                return res.status(400).json({message: `Пользователь с ${username} не найден`})
+                return next(ApiError.badRequest(`Пользователь с ${username} не найден`))
             }
             const validPassword = bcrypt.compareSync(password, candidate.password)
             if(!validPassword) {
-                return res.status(400).json({message: `Пароль не верный`})
+                return next(ApiError.badRequest('Пароль не верный'))
             }
             const token = generateAccessToken(candidate._id, candidate.roles)
             return res.json({token})
         } catch (e) {
             console.log(e)
-            res.status(400).json({message: "Login error"})
+            return next(ApiError.badRequest('Ошибка авторизации'))
         }
     }
 
-    async getUsers(req, res) {
+    async getUsers(req, res, next) {
         try {
             const users = await User.findAll()
             return res.json(users)
         } catch (e) {
             console.log(e)
-            res.status(400).json({message: "Что-то пошло не так"})
+            return next(ApiError.badRequest("Что-то пошло не так"))
         }
     }
 }

@@ -18,6 +18,7 @@ app.use(express.json())
 app.use(cors())
 app.use('/api', posts)
 app.use('/auth', auth)
+app.use(errorMiddleware)
 
 
 async function start() {
