@@ -1,4 +1,4 @@
-import sequalize from '../db.js'
+import sequalize from '../../db.js'
 import {DataTypes} from "sequelize";
 
 const User = sequalize.define('user', {

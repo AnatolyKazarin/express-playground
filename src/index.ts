@@ -3,7 +3,7 @@ import {config} from 'dotenv'
 import mongoose from "mongoose";
 import posts from "./router/posts.js";
 import auth from "./router/auth.js";
-import sequelize from './db.js'
+import sequelize from '../db.js'
 import {User} from './models/pgModels.js'
 import cors from 'cors'
 import errorMiddleware from "./middlewares/errorMiddleware.js";
